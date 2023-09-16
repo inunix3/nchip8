@@ -1,0 +1,16 @@
+[submodule "third-party/sdl2"]
+	path = third-party/sdl2
+	url = https://github.com/libsdl-org/SDL.git
+	branch = SDL2
+[submodule "third-party/imgui"]
+	path = third-party/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "third-party/ImGuiFileDialog"]
+	path = third-party/ImGuiFileDialog
+	url = https://github.com/aiekick/ImGuiFileDialog.git
+[submodule "third-party/libSDL2pp"]
+	path = third-party/libSDL2pp
+	url = https://github.com/libSDL2pp/libSDL2pp.git
+[submodule "third-party/libconfig"]
+	path = third-party/libconfig
+	url = https://github.com/hyperrealm/libconfig.git
