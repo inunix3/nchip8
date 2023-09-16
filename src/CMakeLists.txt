@@ -51,14 +51,16 @@ set(SOURCES
 )
 
 if (COMPILER STREQUAL "gcc" OR COMPILER STREQUAL "clang")
-    set(COMPILE_OPTIONS -Wall -Wextra -Wconversion -Wsign-conversion)
+    set(COMPILE_OPTIONS -Wall -Wextra)
 
     if (NOT COMPILER STREQUAL "gcc")
         # The -Weffc++ flag has been broken in GCC for over 10 years!!
         set(COMPILE_OPTIONS ${COMPILE_OPTIONS} -Weffc++)
 
-        # This flag also reports too many warnings
+        # These flags also report too many warnings
         set(COMPILE_OPTIONS ${COMPILE_OPTIONS} -Wshadow)
+        set(COMPILE_OPTIONS ${COMPILE_OPTIONS} -Wconversion)
+        set(COMPILE_OPTIONS ${COMPILE_OPTIONS} -Wsign-conversion)
     endif()
 endif()
 
