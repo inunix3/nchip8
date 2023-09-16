@@ -11,6 +11,9 @@ add_subdirectory(libconfig)
 
 # SDL2
 set(SDL_TEST OFF CACHE BOOL "" FORCE)
+set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+set(SDL_STATIC ON CACHE BOOL "" FORCE)
+set(SDL_STATIC_PIC ON CACHE BOOL "" FORCE)
 add_subdirectory(sdl2)
 
 # libSDL2pp
