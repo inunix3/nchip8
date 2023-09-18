@@ -61,7 +61,7 @@ void Settings::body() {
         display.offColor = cfg.graphics.offColor;
         display.onColor = cfg.graphics.onColor;
         display.enableGrid = m_enableGrid;
-        display.setScaleFactor(cfg.graphics.scaleFactor);
+        display.scaleFactor = cfg.graphics.scaleFactor;
 
         beeper.frequency = (int) cfg.sound.frequency;
         beeper.level = cfg.sound.level;

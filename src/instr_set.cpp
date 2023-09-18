@@ -240,12 +240,14 @@ void instr_set_impls::random_impl(VM &vm, std::uint16_t opcode) {
 }
 
 void instr_set_impls::drawSprite_impl(VM &vm, std::uint16_t opcode) {
-    auto drawPixel = [&vm = vm](sdl::Point pos, int spriteX) {
+    sdl::Point dispSize = vm.display.size();
+
+    auto drawPixel = [&vm = vm, dispSize](sdl::Point pos, int spriteX) {
         pos.x += spriteX;
 
-        if (pos.x >= DISPLAY_SIZE.x) {
+        if (pos.x >= dispSize.x) {
             if (vm.quirks.wrapPixels) {
-                pos.x %= DISPLAY_SIZE.y;
+                pos.x %= dispSize.y;
             } else {
                 return;
             }
@@ -261,8 +263,8 @@ void instr_set_impls::drawSprite_impl(VM &vm, std::uint16_t opcode) {
     };
 
     OperandMap ops(opcode);
-    std::uint8_t x = vm.state.regs[ops.x] % DISPLAY_SIZE.x;
-    std::uint8_t y = vm.state.regs[ops.y] % DISPLAY_SIZE.y;
+    std::uint8_t x = vm.state.regs[ops.x] % dispSize.x;
+    std::uint8_t y = vm.state.regs[ops.y] % dispSize.y;
     std::uint8_t height = ops.imm1;
 
     vm.state.regs[0xf] = 0;
