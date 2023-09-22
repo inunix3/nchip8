@@ -318,6 +318,12 @@ void UI::mainMenu() {
                 ImGuiFileDialogFlags_Modal);
     }
 
+    static Extension ext = Extension::NONE;
+
+    ImGui::PushItemWidth(btnSize.x);
+    ImGui::Combo("##Extension", (int *) &ext, "CHIP-8\0SCHIP 1.1\0");
+    ImGui::PopItemWidth();
+
     if (ImGui::Button("Settings",      btnSize)) m_settings.show = true;
     if (ImGui::Button("About nCHIP-8", btnSize)) m_showAbout     = true;
     if (ImGui::Button("Quit",          btnSize)) m_quitRequested = true;
@@ -330,6 +336,10 @@ void UI::mainMenu() {
         if (fileDialog->Display("ChooseFileDlgKey", ImGuiWindowFlags_NoCollapse, { 600, 300 })) {
             if (fileDialog->IsOk()) {
                 std::string rom = fileDialog->GetFilePathName();
+
+                if (m_vm.ext() != ext) {
+                    m_vm.setExtension(ext);
+                }
 
                 m_vm.loadFile(rom);
                 m_vm.setMode(VMMode::RUN);
@@ -359,6 +369,7 @@ void UI::about() {
     }
 
     ImGui::TextUnformatted("nCHIP-8 is a yet another CHIP-8 interpreter.");
+    ImGui::TextUnformatted("nCHIP-8 is a customizable CHIP-8/SUPER-CHIP interpreter with debug capabilities.");
 
     ImGui::Dummy({ 0, 1 });
 

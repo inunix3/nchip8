@@ -209,6 +209,13 @@ void VM::updateInputTable(const SDL_Event &event) {
     }
 };
 
+void VM::setExtension(Extension ext) {
+    m_ext = ext;
+
+    m_instrSet.clear();
+    loadInstrSet(ext);
+}
+
 void VM::execInstr(std::uint16_t opcode) {
     InstrKind instr = decodeOpcode(opcode);
 
@@ -487,6 +494,10 @@ VMMode VM::mode() const {
     return m_mode;
 }
 
+Extension VM::ext() const {
+    return m_ext;
+}
+
 InstrKind VM::decodeOpcode(std::uint16_t opcode) {
     auto kind = tryDecodeOpcode(opcode);
 
@@ -498,3 +509,46 @@ InstrKind VM::decodeOpcode(std::uint16_t opcode) {
 
     return kind.value();
 }
+
+void VM::loadInstrSet(Extension ext) {
+    using namespace instr_set_impls;
+
+    static const Instruction instrs[] = {
+        Instruction(InstrKind::CLEAR_SCREEN,        clearScreen_impl),
+        Instruction(InstrKind::RET,                 ret_impl),
+        Instruction(InstrKind::JUMP,                jump_impl),
+        Instruction(InstrKind::CALL,                call_impl),
+        Instruction(InstrKind::SKIP_EQUAL,          skipEqual_impl),
+        Instruction(InstrKind::SKIP_NOT_EQUAL,      skipNotEqual_impl),
+        Instruction(InstrKind::SKIP_REGS_EQUAL,     skipRegsEqual_impl),
+        Instruction(InstrKind::LOAD_BYTE,           loadByte_impl),
+        Instruction(InstrKind::ADD,                 add_impl),
+        Instruction(InstrKind::LOAD_REG,            loadReg_impl),
+        Instruction(InstrKind::OR,                  or_impl),
+        Instruction(InstrKind::AND,                 and_impl),
+        Instruction(InstrKind::XOR,                 xor_impl),
+        Instruction(InstrKind::ADD_REG,             addReg_impl),
+        Instruction(InstrKind::SUB_REG,             subReg_impl),
+        Instruction(InstrKind::RSHIFT,              rshift_impl),
+        Instruction(InstrKind::LOAD_AND_SUB_REG,    loadAndSubReg_impl),
+        Instruction(InstrKind::LSHIFT,              lshift_impl),
+        Instruction(InstrKind::SKIP_REGS_NOT_EQUAL, skipRegsNotEqual_impl),
+        Instruction(InstrKind::LOAD_I,              loadI_impl),
+        Instruction(InstrKind::JUMP_OFFSET,         jumpOffset_impl),
+        Instruction(InstrKind::RANDOM,              random_impl),
+        Instruction(InstrKind::DRAW_SPRITE,         drawSprite_impl),
+        Instruction(InstrKind::SKIP_PRESSED,        skipPressed_impl),
+        Instruction(InstrKind::SKIP_NOT_PRESSED,    skipNotPressed_impl),
+        Instruction(InstrKind::LOAD_DT,             loadDT_impl),
+        Instruction(InstrKind::READ_KEY,            readKey_impl),
+        Instruction(InstrKind::SET_DT,              setDT_impl),
+        Instruction(InstrKind::SET_ST,              setST_impl),
+        Instruction(InstrKind::ADD_I,               addI_impl),
+        Instruction(InstrKind::FONT_CHAR,           fontChar_impl),
+        Instruction(InstrKind::BCD,                 bcd_impl),
+        Instruction(InstrKind::REG_DUMP,            regDump_impl),
+        Instruction(InstrKind::REG_LOAD,            regLoad_impl)
+    };
+    for (const auto &instr : instrs) {
+        m_instrSet.insert({ instr.kind(), instr });
+    }

@@ -84,6 +84,9 @@ namespace nchip8 {
         bool bitwiseResetVF     = false;
         bool shiftSetVxToVy     = true;
         bool loadSaveIncrementI = true;
+    enum class Extension {
+        NONE,
+        SCHIP
     };
 
     class VM {
@@ -94,6 +97,7 @@ namespace nchip8 {
         void update();
         void step();
         void updateInputTable(const SDL_Event &event);
+        void setExtension(Extension ext);
 
         void execInstr(std::uint16_t opcode);
         std::optional<InstrKind> tryDecodeOpcode(std::uint16_t);
@@ -109,6 +113,7 @@ namespace nchip8 {
         void setMode(VMMode mode);
         VMMode prevMode() const;
         VMMode mode() const;
+        Extension ext() const;
 
         VMState state;
         Config cfg;
@@ -122,9 +127,11 @@ namespace nchip8 {
 
     private:
         InstrKind decodeOpcode(std::uint16_t opcode);
+        void loadInstrSet(Extension ext);
 
         std::unordered_map<InstrKind, Instruction> m_instrSet;
         VMMode m_mode = VMMode::EMPTY;
         VMMode m_prevMode;
+        Extension m_ext = Extension::NONE;
     };
 }
