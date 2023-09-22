@@ -118,6 +118,7 @@ namespace nchip8 {
 
         BreakpointMap breakpoints;
         bool waitForKeyRelease = false;
+        std::size_t keyToRelease = 0;
 
     private:
         InstrKind decodeOpcode(std::uint16_t opcode);
