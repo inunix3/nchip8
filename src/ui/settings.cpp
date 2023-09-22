@@ -19,6 +19,7 @@ Settings::Settings(sdl::Window &window, VM &vm, UI &ui)
       m_offColor   { imgui::rgbaToImVec4(vm.cfg.graphics.offColor) },
       m_onColor    { imgui::rgbaToImVec4(vm.cfg.graphics.onColor)  },
       m_enableGrid { vm.display.enableGrid } {
+      m_enableGrid { vm.display.gridEnabled() },
 }
 
 void Settings::body() {
@@ -62,6 +63,12 @@ void Settings::body() {
         display.onColor = cfg.graphics.onColor;
         display.enableGrid = m_enableGrid;
         display.scaleFactor = cfg.graphics.scaleFactor;
+        display.setOffColor(cfg.graphics.offColor);
+        display.setOnColor(cfg.graphics.onColor);
+        m_enableGrid ? display.enableGrid() : display.disableGrid();
+        display.setScaleFactor(cfg.graphics.scaleFactor);
+        display.wrapPixelsX = m_quirks.wrapPixelsX;
+        display.wrapPixelsY = m_quirks.wrapPixelsY;
 
         beeper.frequency = (int) cfg.sound.frequency;
         beeper.level = cfg.sound.level;

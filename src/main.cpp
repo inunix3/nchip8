@@ -26,13 +26,16 @@ MainApplication::MainApplication()
       m_window { "nCHIP-8 v" + VERSION, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_cfg.graphics.windowSize.x,
           m_cfg.graphics.windowSize.y, SDL_WINDOW_ALLOW_HIGHDPI },
       m_renderer { m_window, -1, SDL_RENDERER_ACCELERATED },
-      m_display { m_renderer, m_cfg.graphics.dispRes, m_cfg.graphics.scaleFactor },
+      m_display { m_renderer },
       m_vm { m_display, m_cfg },
       m_ui { m_window, m_renderer, m_vm } {
     std::srand(m_cfg.cpu.rngSeed);
 
-    m_display.offColor = m_cfg.graphics.offColor;
-    m_display.onColor  = m_cfg.graphics.onColor;
+    m_display.setScaleFactor(m_cfg.graphics.scaleFactor);
+    m_display.setOffColor(m_cfg.graphics.offColor);
+    m_display.setOnColor(m_cfg.graphics.onColor);
+    m_display.wrapPixelsX = m_vm.quirks.wrapPixelsX;
+    m_display.wrapPixelsY = m_vm.quirks.wrapPixelsY;
 }
 
 void MainApplication::update() {
@@ -60,6 +63,7 @@ void MainApplication::update() {
         m_ui.showError(err.what());
     }
 
+    m_display.prepare();
     m_ui.update();
 
     if (m_ui.quitRequested()) {
