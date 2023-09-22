@@ -315,6 +315,7 @@ void instr_set_impls::readKey_impl(VM &vm, std::uint16_t opcode) {
 
     for (std::size_t i = 0; i < table.size(); ++i) {
         if (table[i]) {
+            vm.keyToRelease = i;
             vm.waitForKeyRelease = true;
 
             break;
@@ -322,6 +323,8 @@ void instr_set_impls::readKey_impl(VM &vm, std::uint16_t opcode) {
 
         if (vm.waitForKeyRelease && !table[i]) {
             vm.state.regs[ops.x] = (std::uint8_t) i;
+        if (vm.waitForKeyRelease && !table[vm.keyToRelease]) {
+            vm.state.regs[ops.x] = (std::uint8_t) vm.keyToRelease;
             vm.waitForKeyRelease = false;
 
             return;
