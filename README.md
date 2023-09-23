@@ -1,7 +1,7 @@
 # nCHIP-8
 A CHIP-8/SCHIP interpreter, written in C++17 with the use of SDL2 and Dear ImGui for UI. It's customizable and has some debug capabilities!
 
-[**Video demonstration**](https://drive.google.com/file/d/1iOsX1t5adUIJu2qDHnsUx5Pd6OYt5gCg/view?usp=sharing)
+[**Video**](https://drive.google.com/file/d/1VJpbM7gC9RqfsyXIdQ_G24tuiyJ7AvO9/view?usp=sharing)
 
 [**Screenshots**](screenshots/)
 
