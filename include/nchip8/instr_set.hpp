@@ -7,6 +7,7 @@
 
 namespace nchip8::instr_set_impls {
 #define DECL(_name) void _name##_impl(VM &vm, std::uint16_t opcode)
+    // CHIP-8 instructions
     DECL(clearScreen);
     DECL(ret);
     DECL(jump);
@@ -41,5 +42,16 @@ namespace nchip8::instr_set_impls {
     DECL(bcd);
     DECL(regDump);
     DECL(regLoad);
+
+    // SCHIP instructions
+    DECL(hires);
+    DECL(lores);
+    DECL(scrollDown);
+    DECL(scrollRight);
+    DECL(scrollLeft);
+    DECL(bigFontChar);
+    DECL(saveFlags);
+    DECL(loadFlags);
+    DECL(exit);
 #undef DECL
 }

@@ -240,44 +240,39 @@ void instr_set_impls::random_impl(VM &vm, std::uint16_t opcode) {
 }
 
 void instr_set_impls::drawSprite_impl(VM &vm, std::uint16_t opcode) {
-    sdl::Point dispSize = vm.display.size();
-
-    auto drawPixel = [&vm = vm, dispSize](sdl::Point pos, int spriteX) {
-        pos.x += spriteX;
-
-        if (pos.x >= dispSize.x) {
-            if (vm.quirks.wrapPixels) {
-                pos.x %= dispSize.y;
-            } else {
-                return;
-            }
-        }
-
-        PixelState pxState = vm.display.at(pos);
-
-        if (pxState == PixelState::ON) {
-            vm.state.regs[0xf] = 1;
-        }
-
-        vm.display.setPixel(pos, !pxState);
-    };
-
     OperandMap ops(opcode);
-    std::uint8_t x = vm.state.regs[ops.x] % dispSize.x;
-    std::uint8_t y = vm.state.regs[ops.y] % dispSize.y;
     std::uint8_t height = ops.imm1;
 
-    vm.state.regs[0xf] = 0;
+    bool hires = height == 0;
 
-    for (uint8_t i = 0; i < height; ++i) {
-        std::uint8_t spriteRow = vm.state.memory[vm.state.i + i];
+    if (vm.ext() == Extension::NONE && hires) {
+        return;
+    }
 
-        for (std::uint8_t j = 0; j < 8; ++j) {
-            if ((spriteRow & (0x80 >> j))) {
-                drawPixel({ j, y + i }, x);
-            }
+    Sprite sprite;
+
+    sdl::Point dispSize = vm.display.size();
+    sprite.pos = { vm.state.regs[ops.x] % dispSize.x, vm.state.regs[ops.y] % dispSize.y };
+    
+    if (hires) {
+        sprite.width = (vm.display.res() == Resolution::LOW && vm.quirks.draw8x16SpriteInLores) ? 8 : 16;
+
+        for (std::size_t i = 0; i < 32; i += 2) {
+            std::uint16_t msb = (std::uint16_t) (vm.state.memory[vm.state.i + i] << 8);
+            std::uint16_t lsb = vm.state.memory[vm.state.i + i + 1];
+
+            sprite.pixels.push_back(msb | lsb);
+        }
+    } else {
+        sprite.width = 8;
+
+        for (std::size_t i = 0; i < height; ++i) {
+            sprite.pixels.push_back(vm.state.memory[vm.state.i + i]);
         }
     }
+
+    bool collided = vm.display.drawSprite(sprite);
+    vm.state.regs[0xf] = collided;
 }
 
 void instr_set_impls::skipPressed_impl(VM &vm, std::uint16_t opcode) {
@@ -321,8 +316,6 @@ void instr_set_impls::readKey_impl(VM &vm, std::uint16_t opcode) {
             break;
         }
 
-        if (vm.waitForKeyRelease && !table[i]) {
-            vm.state.regs[ops.x] = (std::uint8_t) i;
         if (vm.waitForKeyRelease && !table[vm.keyToRelease]) {
             vm.state.regs[ops.x] = (std::uint8_t) vm.keyToRelease;
             vm.waitForKeyRelease = false;
@@ -407,4 +400,77 @@ void instr_set_impls::regLoad_impl(VM &vm, std::uint16_t opcode) {
     if (vm.quirks.loadSaveIncrementI) {
         regI += ops.x + 1;
     }
+}
+
+void instr_set_impls::hires_impl(VM &vm, std::uint16_t opcode) {
+    (void) opcode;
+
+    vm.display.setResolution(Resolution::HIGH);
+}
+
+void instr_set_impls::lores_impl(VM &vm, std::uint16_t opcode) {
+    (void) opcode;
+
+    vm.display.setResolution(Resolution::LOW);
+}
+
+void instr_set_impls::scrollDown_impl(VM &vm, std::uint16_t opcode) {
+    OperandMap ops(opcode);
+
+    vm.display.scroll(ScrollDirection::DOWN, ops.imm1);
+}
+
+void instr_set_impls::scrollRight_impl(VM &vm, std::uint16_t opcode) {
+    (void) opcode;
+
+    vm.display.scroll(ScrollDirection::RIGHT, 4);
+}
+
+void instr_set_impls::scrollLeft_impl(VM &vm, std::uint16_t opcode) {
+    (void) opcode;
+
+    vm.display.scroll(ScrollDirection::LEFT, 4);
+}
+
+void instr_set_impls::bigFontChar_impl(VM &vm, std::uint16_t opcode) {
+    OperandMap ops(opcode);
+
+    std::uint8_t vx = vm.state.regs[ops.x];
+    vm.state.i = BIG_FONT_OFFSET + vx * BIG_FONT_CHAR_SIZE.y;
+}
+
+void instr_set_impls::saveFlags_impl(VM &vm, std::uint16_t opcode) {
+    OperandMap ops(opcode);
+
+    if (ops.x > 7) {
+        throw VMError("the X should be <= 7, there are only 8 persistent flags");
+    }
+
+    std::uint64_t flags = vm.cfg.cpu.rplFlags;
+    for (std::size_t i = 0; i < ops.x && flags != 0; ++i) {
+        flags |= vm.state.regs[i];
+        flags >>= 8;
+    }
+
+    vm.cfg.cpu.rplFlags = flags;
+}
+
+void instr_set_impls::loadFlags_impl(VM &vm, std::uint16_t opcode) {
+    OperandMap ops(opcode);
+
+    if (ops.x > 7) {
+        throw VMError("the X should be <= 7, there are only 8 persistent flags");
+    }
+
+    std::uint64_t flags = vm.cfg.cpu.rplFlags;
+    for (std::size_t i = 0; i < ops.x && flags != 0; ++i) {
+        vm.state.regs[i] = flags & 0xff;
+        flags >>= 8;
+    }
+}
+
+void instr_set_impls::exit_impl(VM &vm, std::uint16_t opcode) {
+    (void) opcode;
+
+    vm.unload();
 }

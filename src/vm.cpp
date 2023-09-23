@@ -203,11 +203,9 @@ void VM::execInstr(std::uint16_t opcode) {
 }
 
 std::optional<InstrKind> VM::tryDecodeOpcode(std::uint16_t opcode) {
-    if ((opcode & 0xfff0) == 0x00e0) {
-        switch (opcode & 0x000f) {
-        case 0x0: return InstrKind::CLEAR_SCREEN;
-        case 0xe: return InstrKind::RET;
-        }
+    switch (opcode & 0xffff) {
+    case 0x00e0: return InstrKind::CLEAR_SCREEN;
+    case 0x00ee: return InstrKind::RET;
     }
 
     switch (opcode & 0xf000) {
@@ -249,6 +247,26 @@ std::optional<InstrKind> VM::tryDecodeOpcode(std::uint16_t opcode) {
     case 0xf033: return InstrKind::BCD;
     case 0xf055: return InstrKind::REG_DUMP;
     case 0xf065: return InstrKind::REG_LOAD;
+    }
+
+    if (m_ext == Extension::SCHIP) {
+        if ((opcode & 0xfff0) == 0x00c0) {
+            return InstrKind::SCROLL_DOWN;
+        }
+
+        switch (opcode & 0xffff) {
+        case 0x00ff: return InstrKind::HIRES;
+        case 0x00fe: return InstrKind::LORES;
+        case 0x00fb: return InstrKind::SCROLL_RIGHT;
+        case 0x00fc: return InstrKind::SCROLL_LEFT;
+        case 0x00fd: return InstrKind::EXIT;
+        }
+
+        switch (opcode & 0xf0ff) {
+        case 0xf030: return InstrKind::BIG_FONT_CHAR;
+        case 0xf075: return InstrKind::SAVE_FLAGS;
+        case 0xf085: return InstrKind::LOAD_FLAGS;
+        }
     }
 
     return std::nullopt;
@@ -454,6 +472,42 @@ std::string VM::disassemble(std::uint16_t opcode) {
         str << "reg_load " << xReg;
 
         break;
+    case InstrKind::HIRES:
+        str << "hires";
+
+        break;
+    case InstrKind::LORES:
+        str << "lores ";
+
+        break;
+    case InstrKind::SCROLL_DOWN:
+        str << "scroll_down " << utils::toHexPrefixed(ops.imm1);
+
+        break;
+    case InstrKind::SCROLL_RIGHT:
+        str << "scroll_right" << xReg;
+
+        break;
+    case InstrKind::SCROLL_LEFT:
+        str << "scroll_left" << xReg;
+
+        break;
+    case InstrKind::BIG_FONT_CHAR:
+        str << "load I, bigfont[" << xReg << ']';
+
+        break;
+    case InstrKind::SAVE_FLAGS:
+        str << "save_flags V0-" << xReg;
+
+        break;
+    case InstrKind::LOAD_FLAGS:
+        str << "load_flags V0-" << xReg;
+
+        break;
+    case InstrKind::EXIT:
+        str << "exit";
+
+        break;
     }
 
     return str.str();
@@ -531,6 +585,26 @@ void VM::loadInstrSet(Extension ext) {
         Instruction(InstrKind::REG_DUMP,            regDump_impl),
         Instruction(InstrKind::REG_LOAD,            regLoad_impl)
     };
+
+    static const Instruction schipInstrs[] = {
+        Instruction(InstrKind::HIRES, hires_impl),
+        Instruction(InstrKind::LORES, lores_impl),
+        Instruction(InstrKind::SCROLL_DOWN, scrollDown_impl),
+        Instruction(InstrKind::SCROLL_RIGHT, scrollRight_impl),
+        Instruction(InstrKind::SCROLL_LEFT, scrollLeft_impl),
+        Instruction(InstrKind::BIG_FONT_CHAR, bigFontChar_impl),
+        Instruction(InstrKind::SAVE_FLAGS, saveFlags_impl),
+        Instruction(InstrKind::LOAD_FLAGS, loadFlags_impl),
+        Instruction(InstrKind::EXIT, exit_impl),
+    };
+
     for (const auto &instr : instrs) {
         m_instrSet.insert({ instr.kind(), instr });
     }
+
+    if (ext == Extension::SCHIP) {
+        for (const auto &instr : schipInstrs) {
+            m_instrSet.insert({ instr.kind(), instr });
+        }
+    }
+}
