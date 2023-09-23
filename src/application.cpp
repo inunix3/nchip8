@@ -14,6 +14,8 @@ void Application::run() {
         update();
         render();
     }
+
+    deinit();
 }
 
 void Application::update() {
@@ -21,5 +23,9 @@ void Application::update() {
 }
 
 void Application::render() {
+
+}
+
+void Application::deinit() {
 
 }

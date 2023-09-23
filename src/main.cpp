@@ -81,6 +81,10 @@ void MainApplication::render() {
     m_renderer.Present();
 }
 
+void MainApplication::deinit() {
+    m_cfg.writeFile();
+}
+
 Config MainApplication::readConfig() {
     auto getHomeDirPath = []() -> std::optional<std::string> {
         const char *home = std::getenv("HOME");

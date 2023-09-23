@@ -18,8 +18,7 @@ Settings::Settings(sdl::Window &window, VM &vm, UI &ui)
       m_quirks     { vm.quirks },
       m_offColor   { imgui::rgbaToImVec4(vm.cfg.graphics.offColor) },
       m_onColor    { imgui::rgbaToImVec4(vm.cfg.graphics.onColor)  },
-      m_enableGrid { vm.display.gridEnabled() },
-      m_rplFlags   { vm.cfg.cpu.rplFlags } {
+      m_enableGrid { vm.display.gridEnabled() } {
 
 }
 
@@ -27,6 +26,11 @@ void Settings::body() {
     auto &cfg     = m_vm.cfg;
     auto &display = m_vm.display;
     auto &beeper  = m_vm.beeper;
+
+    // synchronize if flags were changed by executing the FX75 opcode
+    if (m_newCfg.cpu.rplFlags != cfg.cpu.rplFlags) {
+        m_newCfg.cpu.rplFlags  = cfg.cpu.rplFlags;
+    }
 
     if (ImGui::BeginTabBar("Settings Tab bar")) {
         if (ImGui::BeginTabItem("CPU"))      { sectionCPU();      ImGui::EndTabItem(); }
@@ -56,7 +60,6 @@ void Settings::body() {
         }
 
         cfg = m_newCfg;
-        cfg.cpu.rplFlags = m_rplFlags;
         cfg.writeFile();
 
         m_vm.quirks = m_quirks;
@@ -107,7 +110,11 @@ void Settings::sectionCPU() {
 
     markerNotSaved();
 
-    ImGui::InputScalar("RPL flags", ImGuiDataType_U64, &m_rplFlags, nullptr, nullptr, "%" PRIx64);
+    if (ImGui::InputScalar("RPL flags", ImGuiDataType_U64, &m_newCfg.cpu.rplFlags, nullptr, nullptr, "%" PRIx64,
+                ImGuiInputTextFlags_EnterReturnsTrue)) {
+        m_vm.cfg.cpu.rplFlags = m_newCfg.cpu.rplFlags;
+    }
+
     marker("SCHIP/XO-CHIP only");
 
     ImGui::Checkbox("Debug mode", &m_newCfg.cpu.debugMode);

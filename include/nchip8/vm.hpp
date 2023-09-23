@@ -100,7 +100,7 @@ namespace nchip8 {
 
     class VM {
     public:
-        VM(Display &display, const Config &cfg);
+        VM(Display &display, Config &cfg);
 
         // Steps and updates the timers
         void update();
@@ -125,7 +125,7 @@ namespace nchip8 {
         Extension ext() const;
 
         VMState state;
-        Config cfg;
+        Config &cfg;
         Quirks quirks;
         Display &display;
         WaveformGenerator beeper;

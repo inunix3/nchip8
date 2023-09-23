@@ -19,6 +19,7 @@ namespace nchip8 {
 
         void update() override;
         void render() override;
+        void deinit() override;
 
     private:
         Config readConfig();

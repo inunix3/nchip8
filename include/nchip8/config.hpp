@@ -82,7 +82,7 @@ namespace nchip8 {
         // By SCHIP design, these were supposed to be the RPL user flags on HP-48.
         //
         // SCHIP/XO-CHIP only
-        std::uint64_t rplFlags;
+        std::uint64_t rplFlags = 0;
     };
 
     struct SoundConfig {

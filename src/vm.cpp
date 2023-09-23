@@ -100,7 +100,7 @@ void VMState::reset() {
     inputTable.reset();
 }
 
-VM::VM(Display &display, const Config &cfg)
+VM::VM(Display &display, Config &cfg)
     : cfg { cfg },
       display { display },
       beeper { cfg.sound.waveform, cfg.sound.level, cfg.sound.frequency } {

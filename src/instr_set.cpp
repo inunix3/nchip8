@@ -4,6 +4,7 @@
 #include <nchip8/instr_set.hpp>
 
 #include <cstdlib>
+#include <cstring>
 #include <limits>
 
 using namespace nchip8;
@@ -446,13 +447,14 @@ void instr_set_impls::saveFlags_impl(VM &vm, std::uint16_t opcode) {
         throw VMError("the X should be <= 7, there are only 8 persistent flags");
     }
 
-    std::uint64_t flags = vm.cfg.cpu.rplFlags;
-    for (std::size_t i = 0; i < ops.x && flags != 0; ++i) {
-        flags |= vm.state.regs[i];
-        flags >>= 8;
+    std::array<std::uint8_t, 8> flags;
+    std::memcpy(flags.data(), &vm.cfg.cpu.rplFlags, sizeof(std::uint64_t));
+
+    for (std::size_t i = 0; i < ops.x; ++i) {
+        flags[i] = vm.state.regs[i];
     }
 
-    vm.cfg.cpu.rplFlags = flags;
+    std::memcpy(&vm.cfg.cpu.rplFlags, flags.data(), sizeof(std::uint64_t));
 }
 
 void instr_set_impls::loadFlags_impl(VM &vm, std::uint16_t opcode) {
@@ -462,10 +464,11 @@ void instr_set_impls::loadFlags_impl(VM &vm, std::uint16_t opcode) {
         throw VMError("the X should be <= 7, there are only 8 persistent flags");
     }
 
-    std::uint64_t flags = vm.cfg.cpu.rplFlags;
-    for (std::size_t i = 0; i < ops.x && flags != 0; ++i) {
-        vm.state.regs[i] = flags & 0xff;
-        flags >>= 8;
+    std::array<std::uint8_t, 8> flags;
+    std::memcpy(flags.data(), &vm.cfg.cpu.rplFlags, sizeof(std::uint64_t));
+
+    for (std::size_t i = 0; i < ops.x; ++i) {
+        vm.state.regs[i] = flags[i];
     }
 }
 
