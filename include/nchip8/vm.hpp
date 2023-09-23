@@ -50,6 +50,9 @@ namespace nchip8 {
     inline constexpr sdl::Point    FONT_CHAR_SIZE = { 4, 5 };
     inline constexpr std::size_t   FONT_MEM_SIZE  = FONT_CHAR_SIZE.y * 16;
     inline constexpr std::size_t   STACK_MAX_SIZE = 12;
+    inline constexpr std::uint16_t BIG_FONT_OFFSET    = FONT_MEM_SIZE;
+    inline constexpr sdl::Point    BIG_FONT_CHAR_SIZE = { 8, 10 };
+    inline constexpr std::size_t   BIG_FONT_MEM_SIZE  = BIG_FONT_CHAR_SIZE.y * 16;
     inline constexpr int TIMER_UPDATE_FREQ = 1000 / 60;
 
     struct VMState {
