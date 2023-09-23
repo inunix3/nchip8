@@ -231,7 +231,7 @@ void instr_set_impls::jumpOffset_impl(VM &vm, std::uint16_t opcode) {
         offset = vm.state.regs[ops.x];
     }
 
-    vm.state.i = ops.addr + offset;
+    vm.state.pc = ops.addr + offset;
 }
 
 void instr_set_impls::random_impl(VM &vm, std::uint16_t opcode) {
