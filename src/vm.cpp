@@ -291,6 +291,7 @@ void VM::loadFile(const std::string &filename) {
 void VM::reset() {
     state.reset();
     display.clear();
+    display.setResolution(Resolution::LOW);
 }
 
 void VM::unload() {
@@ -299,6 +300,8 @@ void VM::unload() {
     std::memset(&state.memory[BIG_FONT_MEM_SIZE], 0, MEM_SIZE - BIG_FONT_MEM_SIZE);
     state.romSize = 0;
     reset();
+
+    setMode(VMMode::EMPTY);
 }
 
 std::string VM::disassemble(std::uint16_t opcode) {
