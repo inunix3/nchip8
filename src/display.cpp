@@ -39,11 +39,6 @@ void Display::prepare() {
     // We're writing our display buffer to the texture to speed up rendering
     m_renderer.SetTarget(m_texture);
 
-    float oldScaleX = m_renderer.GetXScale();
-    float oldScaleY = m_renderer.GetYScale();
-
-    m_renderer.SetScale((float) m_scaleFactor, (float) m_scaleFactor);
-
     for (auto lineN : m_updatedLines) {
         const auto &line = m_lines[lineN];
 
@@ -54,7 +49,6 @@ void Display::prepare() {
         }
     }
 
-    m_renderer.SetScale(oldScaleX, oldScaleY);
     // Reset target to the default
     m_renderer.SetTarget();
 
@@ -65,7 +59,12 @@ void Display::prepare() {
 void Display::draw() {
     sdl::Rect part = { { 0, 0 }, m_size * m_pixelSize };
 
+    float oldScaleX = m_renderer.GetXScale();
+    float oldScaleY = m_renderer.GetYScale();
+
+    m_renderer.SetScale((float) m_scaleFactor, (float) m_scaleFactor);
     m_renderer.Copy(m_texture, sdl::NullOpt, part);
+    m_renderer.SetScale(oldScaleX, oldScaleY);
 }
 
 void Display::clear() {
