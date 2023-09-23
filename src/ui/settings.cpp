@@ -19,6 +19,8 @@ Settings::Settings(sdl::Window &window, VM &vm, UI &ui)
       m_offColor   { imgui::rgbaToImVec4(vm.cfg.graphics.offColor) },
       m_onColor    { imgui::rgbaToImVec4(vm.cfg.graphics.onColor)  },
       m_enableGrid { vm.display.gridEnabled() },
+      m_rplFlags   { vm.cfg.cpu.rplFlags } {
+
 }
 
 void Settings::body() {
@@ -54,6 +56,7 @@ void Settings::body() {
         }
 
         cfg = m_newCfg;
+        cfg.cpu.rplFlags = m_rplFlags;
         cfg.writeFile();
 
         m_vm.quirks = m_quirks;
@@ -103,6 +106,9 @@ void Settings::sectionCPU() {
     }
 
     markerNotSaved();
+
+    ImGui::InputScalar("RPL flags", ImGuiDataType_U64, &m_rplFlags, nullptr, nullptr, "%" PRIx64);
+    marker("SCHIP/XO-CHIP only");
 
     ImGui::Checkbox("Debug mode", &m_newCfg.cpu.debugMode);
     markerNotSaved();
@@ -212,13 +218,17 @@ void Settings::sectionUI() {
 }
 
 void Settings::markerNotSaved() {
+    marker("This setting is not saved to the config file");
+};
+
+void Settings::marker(const std::string &text) {
     ImGui::SameLine();
     ImGui::TextDisabled("(*)");
 
     if (ImGui::BeginItemTooltip()) {
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted("This setting is not saved to the config file");
+        ImGui::TextUnformatted(text.c_str());
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
-};
+}

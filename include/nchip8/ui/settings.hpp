@@ -25,6 +25,7 @@ namespace nchip8::ui {
         void sectionUI();
 
         void markerNotSaved();
+        void marker(const std::string &text);
 
         sdl::Window &m_window;
         VM     &m_vm;
@@ -34,5 +35,6 @@ namespace nchip8::ui {
         ImVec4  m_offColor;
         ImVec4  m_onColor;
         bool    m_enableGrid;
+        std::uint64_t m_rplFlags;
     };
 }

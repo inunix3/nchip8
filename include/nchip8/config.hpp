@@ -78,6 +78,11 @@ namespace nchip8 {
         unsigned cyclesPerSec = 250;
         unsigned rngSeed      = (unsigned) time(NULL);
         bool     debugMode    = false;
+
+        // By SCHIP design, these were supposed to be the RPL user flags on HP-48.
+        //
+        // SCHIP/XO-CHIP only
+        std::uint64_t rplFlags;
     };
 
     struct SoundConfig {
