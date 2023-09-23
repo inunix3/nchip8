@@ -296,7 +296,6 @@ void VM::reset() {
 
 void VM::unload() {
     // Fill memory with zeros except for the font space
-    std::memset(&state.memory[FONT_MEM_SIZE], 0, MEM_SIZE - FONT_MEM_SIZE);
     std::memset(&state.memory[BIG_FONT_MEM_SIZE], 0, MEM_SIZE - BIG_FONT_MEM_SIZE);
     state.romSize = 0;
     reset();

@@ -46,9 +46,9 @@ namespace nchip8 {
         std::vector<std::uint16_t> pixels;
         int width;
     };
+
     class Display {
     public:
-        Display(sdl::Renderer &renderer, Resolution res, int scaleFactor);
         Display(sdl::Renderer &renderer);
 
         void prepare();
@@ -59,6 +59,7 @@ namespace nchip8 {
 
         bool drawSprite(const Sprite &sprite);
         void scroll(ScrollDirection dir, int n);
+
         void setResolution(Resolution res);
         void setScaleFactor(int factor);
         void setOffColor(sdl::Color color);

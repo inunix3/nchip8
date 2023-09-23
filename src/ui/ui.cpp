@@ -233,7 +233,6 @@ void UI::menu() {
 
     if (ImGui::MenuItem("Unload ROM")) {
         m_vm.unload();
-        m_vm.setMode(VMMode::EMPTY);
         m_showPauseScreen = false;
     }
 
@@ -368,7 +367,6 @@ void UI::about() {
         return;
     }
 
-    ImGui::TextUnformatted("nCHIP-8 is a yet another CHIP-8 interpreter.");
     ImGui::TextUnformatted("nCHIP-8 is a customizable CHIP-8/SUPER-CHIP interpreter with debug capabilities.");
 
     ImGui::Dummy({ 0, 1 });
