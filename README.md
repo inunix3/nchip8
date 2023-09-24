@@ -66,6 +66,8 @@ Maybe, for certain games you'd like to change the amount of cycles per second, c
 
 [**Collections of ROMs for CHIP-8**](https://github.com/kripod/chip8-roms)
 
+[**CHIP-8 Archive**](https://johnearnest.github.io/chip8Archive/)
+
 [**Mastering SuperChip**](http://johnearnest.github.io/Octo/docs/SuperChip.html)
 
 [**SuperChip investigations**](https://github.com/Chromatophore/HP48-Superchip)
