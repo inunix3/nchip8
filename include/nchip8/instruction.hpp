@@ -9,6 +9,7 @@
 
 namespace nchip8 {
     enum class InstrKind {
+        // CHIP-8 instructions (they are also supported by SCHIP and XO-CHIP)
         CLEAR_SCREEN,
         RET,
         JUMP,
@@ -42,7 +43,18 @@ namespace nchip8 {
         FONT_CHAR,
         BCD,
         REG_DUMP,
-        REG_LOAD
+        REG_LOAD,
+
+        // SCHIP instructions (XO-CHIP also supports)
+        HIRES,
+        LORES,
+        SCROLL_DOWN,
+        SCROLL_RIGHT,
+        SCROLL_LEFT,
+        BIG_FONT_CHAR,
+        SAVE_FLAGS,
+        LOAD_FLAGS,
+        EXIT
     };
 
     std::string instrKindToString(InstrKind kind);

@@ -65,7 +65,7 @@ namespace nchip8 {
     struct GraphicsConfig {
         sdl::Color offColor   = { 0x00, 0x00, 0x00, 0xff };
         sdl::Color onColor    = { 0xff, 0xff, 0xff, 0xff };
-        sdl::Point windowSize = { DISPLAY_SIZE * 10 };
+        sdl::Point windowSize = LORES_DISPLAY_SIZE * 10;
         int scaleFactor = 1;
     };
 
@@ -78,6 +78,11 @@ namespace nchip8 {
         unsigned cyclesPerSec = 250;
         unsigned rngSeed      = (unsigned) time(NULL);
         bool     debugMode    = false;
+
+        // By SCHIP design, these were supposed to be the RPL user flags on HP-48.
+        //
+        // SCHIP/XO-CHIP only
+        std::uint64_t rplFlags = 0;
     };
 
     struct SoundConfig {

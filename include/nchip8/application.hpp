@@ -13,6 +13,7 @@ namespace nchip8 {
         void run();
         virtual void update();
         virtual void render();
+        virtual void deinit();
 
     protected:
         bool m_quit = false;

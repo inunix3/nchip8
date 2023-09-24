@@ -49,8 +49,28 @@ VMState::VMState() :
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
+    static const std::uint8_t bigFont[] = {
+        0xFF, 0xFF, 0xC3, 0xC3, 0xC3, 0xC3, 0xC3, 0xC3, 0xFF, 0xFF, // 0
+        0x18, 0x78, 0x78, 0x18, 0x18, 0x18, 0x18, 0x18, 0xFF, 0xFF, // 1
+        0xFF, 0xFF, 0x03, 0x03, 0xFF, 0xFF, 0xC0, 0xC0, 0xFF, 0xFF, // 2
+        0xFF, 0xFF, 0x03, 0x03, 0xFF, 0xFF, 0x03, 0x03, 0xFF, 0xFF, // 3
+        0xC3, 0xC3, 0xC3, 0xC3, 0xFF, 0xFF, 0x03, 0x03, 0x03, 0x03, // 4
+        0xFF, 0xFF, 0xC0, 0xC0, 0xFF, 0xFF, 0x03, 0x03, 0xFF, 0xFF, // 5
+        0xFF, 0xFF, 0xC0, 0xC0, 0xFF, 0xFF, 0xC3, 0xC3, 0xFF, 0xFF, // 6
+        0xFF, 0xFF, 0x03, 0x03, 0x06, 0x0C, 0x18, 0x18, 0x18, 0x18, // 7
+        0xFF, 0xFF, 0xC3, 0xC3, 0xFF, 0xFF, 0xC3, 0xC3, 0xFF, 0xFF, // 8
+        0xFF, 0xFF, 0xC3, 0xC3, 0xFF, 0xFF, 0x03, 0x03, 0xFF, 0xFF, // 9
+        0x7E, 0xFF, 0xC3, 0xC3, 0xC3, 0xFF, 0xFF, 0xC3, 0xC3, 0xC3, // A
+        0xFC, 0xFC, 0xC3, 0xC3, 0xFC, 0xFC, 0xC3, 0xC3, 0xFC, 0xFC, // B
+        0x3C, 0xFF, 0xC3, 0xC0, 0xC0, 0xC0, 0xC0, 0xC3, 0xFF, 0x3C, // C
+        0xFC, 0xFE, 0xC3, 0xC3, 0xC3, 0xC3, 0xC3, 0xC3, 0xFE, 0xFC, // D
+        0xFF, 0xFF, 0xC0, 0xC0, 0xFF, 0xFF, 0xC0, 0xC0, 0xFF, 0xFF, // E
+        0xFF, 0xFF, 0xC0, 0xC0, 0xFF, 0xFF, 0xC0, 0xC0, 0xC0, 0xC0  // F
+    };
+
     memory.fill(0);
-    std::memcpy(&memory[FONT_OFFSET], font, sizeof(font) / sizeof(font[0]));
+    std::memcpy(&memory[FONT_OFFSET],     font,    FONT_MEM_SIZE);
+    std::memcpy(&memory[BIG_FONT_OFFSET], bigFont, BIG_FONT_MEM_SIZE);
 
     reset();
 }
@@ -80,52 +100,11 @@ void VMState::reset() {
     inputTable.reset();
 }
 
-VM::VM(Display &display, const Config &cfg)
+VM::VM(Display &display, Config &cfg)
     : cfg { cfg },
       display { display },
       beeper { cfg.sound.waveform, cfg.sound.level, cfg.sound.frequency } {
-    using namespace instr_set_impls;
-
-    static const Instruction instrs[] = {
-        Instruction(InstrKind::CLEAR_SCREEN,        clearScreen_impl),
-        Instruction(InstrKind::RET,                 ret_impl),
-        Instruction(InstrKind::JUMP,                jump_impl),
-        Instruction(InstrKind::CALL,                call_impl),
-        Instruction(InstrKind::SKIP_EQUAL,          skipEqual_impl),
-        Instruction(InstrKind::SKIP_NOT_EQUAL,      skipNotEqual_impl),
-        Instruction(InstrKind::SKIP_REGS_EQUAL,     skipRegsEqual_impl),
-        Instruction(InstrKind::LOAD_BYTE,           loadByte_impl),
-        Instruction(InstrKind::ADD,                 add_impl),
-        Instruction(InstrKind::LOAD_REG,            loadReg_impl),
-        Instruction(InstrKind::OR,                  or_impl),
-        Instruction(InstrKind::AND,                 and_impl),
-        Instruction(InstrKind::XOR,                 xor_impl),
-        Instruction(InstrKind::ADD_REG,             addReg_impl),
-        Instruction(InstrKind::SUB_REG,             subReg_impl),
-        Instruction(InstrKind::RSHIFT,              rshift_impl),
-        Instruction(InstrKind::LOAD_AND_SUB_REG,    loadAndSubReg_impl),
-        Instruction(InstrKind::LSHIFT,              lshift_impl),
-        Instruction(InstrKind::SKIP_REGS_NOT_EQUAL, skipRegsNotEqual_impl),
-        Instruction(InstrKind::LOAD_I,              loadI_impl),
-        Instruction(InstrKind::JUMP_OFFSET,         jumpOffset_impl),
-        Instruction(InstrKind::RANDOM,              random_impl),
-        Instruction(InstrKind::DRAW_SPRITE,         drawSprite_impl),
-        Instruction(InstrKind::SKIP_PRESSED,        skipPressed_impl),
-        Instruction(InstrKind::SKIP_NOT_PRESSED,    skipNotPressed_impl),
-        Instruction(InstrKind::LOAD_DT,             loadDT_impl),
-        Instruction(InstrKind::READ_KEY,            readKey_impl),
-        Instruction(InstrKind::SET_DT,              setDT_impl),
-        Instruction(InstrKind::SET_ST,              setST_impl),
-        Instruction(InstrKind::ADD_I,               addI_impl),
-        Instruction(InstrKind::FONT_CHAR,           fontChar_impl),
-        Instruction(InstrKind::BCD,                 bcd_impl),
-        Instruction(InstrKind::REG_DUMP,            regDump_impl),
-        Instruction(InstrKind::REG_LOAD,            regLoad_impl)
-    };
-
-    for (const auto &instr : instrs) {
-        m_instrSet.insert({ instr.kind(), instr });
-    }
+    loadInstrSet(m_ext);
 }
 
 void VM::update() {
@@ -209,6 +188,13 @@ void VM::updateInputTable(const SDL_Event &event) {
     }
 };
 
+void VM::setExtension(Extension ext) {
+    m_ext = ext;
+
+    m_instrSet.clear();
+    loadInstrSet(ext);
+}
+
 void VM::execInstr(std::uint16_t opcode) {
     InstrKind instr = decodeOpcode(opcode);
 
@@ -217,11 +203,9 @@ void VM::execInstr(std::uint16_t opcode) {
 }
 
 std::optional<InstrKind> VM::tryDecodeOpcode(std::uint16_t opcode) {
-    if ((opcode & 0xfff0) == 0x00e0) {
-        switch (opcode & 0x000f) {
-        case 0x0: return InstrKind::CLEAR_SCREEN;
-        case 0xe: return InstrKind::RET;
-        }
+    switch (opcode & 0xffff) {
+    case 0x00e0: return InstrKind::CLEAR_SCREEN;
+    case 0x00ee: return InstrKind::RET;
     }
 
     switch (opcode & 0xf000) {
@@ -265,6 +249,26 @@ std::optional<InstrKind> VM::tryDecodeOpcode(std::uint16_t opcode) {
     case 0xf065: return InstrKind::REG_LOAD;
     }
 
+    if (m_ext == Extension::SCHIP) {
+        if ((opcode & 0xfff0) == 0x00c0) {
+            return InstrKind::SCROLL_DOWN;
+        }
+
+        switch (opcode & 0xffff) {
+        case 0x00ff: return InstrKind::HIRES;
+        case 0x00fe: return InstrKind::LORES;
+        case 0x00fb: return InstrKind::SCROLL_RIGHT;
+        case 0x00fc: return InstrKind::SCROLL_LEFT;
+        case 0x00fd: return InstrKind::EXIT;
+        }
+
+        switch (opcode & 0xf0ff) {
+        case 0xf030: return InstrKind::BIG_FONT_CHAR;
+        case 0xf075: return InstrKind::SAVE_FLAGS;
+        case 0xf085: return InstrKind::LOAD_FLAGS;
+        }
+    }
+
     return std::nullopt;
 }
 
@@ -305,13 +309,16 @@ void VM::loadFile(const std::string &filename) {
 void VM::reset() {
     state.reset();
     display.clear();
+    display.setResolution(Resolution::LOW);
 }
 
 void VM::unload() {
     // Fill memory with zeros except for the font space
-    std::memset(&state.memory[FONT_MEM_SIZE], 0, MEM_SIZE - FONT_MEM_SIZE);
+    std::memset(&state.memory[BIG_FONT_MEM_SIZE], 0, MEM_SIZE - BIG_FONT_MEM_SIZE);
     state.romSize = 0;
     reset();
+
+    setMode(VMMode::EMPTY);
 }
 
 std::string VM::disassemble(std::uint16_t opcode) {
@@ -465,6 +472,42 @@ std::string VM::disassemble(std::uint16_t opcode) {
         str << "reg_load " << xReg;
 
         break;
+    case InstrKind::HIRES:
+        str << "hires";
+
+        break;
+    case InstrKind::LORES:
+        str << "lores ";
+
+        break;
+    case InstrKind::SCROLL_DOWN:
+        str << "scroll_down " << utils::toHexPrefixed(ops.imm1);
+
+        break;
+    case InstrKind::SCROLL_RIGHT:
+        str << "scroll_right" << xReg;
+
+        break;
+    case InstrKind::SCROLL_LEFT:
+        str << "scroll_left" << xReg;
+
+        break;
+    case InstrKind::BIG_FONT_CHAR:
+        str << "load I, bigfont[" << xReg << ']';
+
+        break;
+    case InstrKind::SAVE_FLAGS:
+        str << "save_flags V0-" << xReg;
+
+        break;
+    case InstrKind::LOAD_FLAGS:
+        str << "load_flags V0-" << xReg;
+
+        break;
+    case InstrKind::EXIT:
+        str << "exit";
+
+        break;
     }
 
     return str.str();
@@ -487,6 +530,10 @@ VMMode VM::mode() const {
     return m_mode;
 }
 
+Extension VM::ext() const {
+    return m_ext;
+}
+
 InstrKind VM::decodeOpcode(std::uint16_t opcode) {
     auto kind = tryDecodeOpcode(opcode);
 
@@ -497,4 +544,67 @@ InstrKind VM::decodeOpcode(std::uint16_t opcode) {
     }
 
     return kind.value();
+}
+
+void VM::loadInstrSet(Extension ext) {
+    using namespace instr_set_impls;
+
+    static const Instruction instrs[] = {
+        Instruction(InstrKind::CLEAR_SCREEN,        clearScreen_impl),
+        Instruction(InstrKind::RET,                 ret_impl),
+        Instruction(InstrKind::JUMP,                jump_impl),
+        Instruction(InstrKind::CALL,                call_impl),
+        Instruction(InstrKind::SKIP_EQUAL,          skipEqual_impl),
+        Instruction(InstrKind::SKIP_NOT_EQUAL,      skipNotEqual_impl),
+        Instruction(InstrKind::SKIP_REGS_EQUAL,     skipRegsEqual_impl),
+        Instruction(InstrKind::LOAD_BYTE,           loadByte_impl),
+        Instruction(InstrKind::ADD,                 add_impl),
+        Instruction(InstrKind::LOAD_REG,            loadReg_impl),
+        Instruction(InstrKind::OR,                  or_impl),
+        Instruction(InstrKind::AND,                 and_impl),
+        Instruction(InstrKind::XOR,                 xor_impl),
+        Instruction(InstrKind::ADD_REG,             addReg_impl),
+        Instruction(InstrKind::SUB_REG,             subReg_impl),
+        Instruction(InstrKind::RSHIFT,              rshift_impl),
+        Instruction(InstrKind::LOAD_AND_SUB_REG,    loadAndSubReg_impl),
+        Instruction(InstrKind::LSHIFT,              lshift_impl),
+        Instruction(InstrKind::SKIP_REGS_NOT_EQUAL, skipRegsNotEqual_impl),
+        Instruction(InstrKind::LOAD_I,              loadI_impl),
+        Instruction(InstrKind::JUMP_OFFSET,         jumpOffset_impl),
+        Instruction(InstrKind::RANDOM,              random_impl),
+        Instruction(InstrKind::DRAW_SPRITE,         drawSprite_impl),
+        Instruction(InstrKind::SKIP_PRESSED,        skipPressed_impl),
+        Instruction(InstrKind::SKIP_NOT_PRESSED,    skipNotPressed_impl),
+        Instruction(InstrKind::LOAD_DT,             loadDT_impl),
+        Instruction(InstrKind::READ_KEY,            readKey_impl),
+        Instruction(InstrKind::SET_DT,              setDT_impl),
+        Instruction(InstrKind::SET_ST,              setST_impl),
+        Instruction(InstrKind::ADD_I,               addI_impl),
+        Instruction(InstrKind::FONT_CHAR,           fontChar_impl),
+        Instruction(InstrKind::BCD,                 bcd_impl),
+        Instruction(InstrKind::REG_DUMP,            regDump_impl),
+        Instruction(InstrKind::REG_LOAD,            regLoad_impl)
+    };
+
+    static const Instruction schipInstrs[] = {
+        Instruction(InstrKind::HIRES, hires_impl),
+        Instruction(InstrKind::LORES, lores_impl),
+        Instruction(InstrKind::SCROLL_DOWN, scrollDown_impl),
+        Instruction(InstrKind::SCROLL_RIGHT, scrollRight_impl),
+        Instruction(InstrKind::SCROLL_LEFT, scrollLeft_impl),
+        Instruction(InstrKind::BIG_FONT_CHAR, bigFontChar_impl),
+        Instruction(InstrKind::SAVE_FLAGS, saveFlags_impl),
+        Instruction(InstrKind::LOAD_FLAGS, loadFlags_impl),
+        Instruction(InstrKind::EXIT, exit_impl),
+    };
+
+    for (const auto &instr : instrs) {
+        m_instrSet.insert({ instr.kind(), instr });
+    }
+
+    if (ext == Extension::SCHIP) {
+        for (const auto &instr : schipInstrs) {
+            m_instrSet.insert({ instr.kind(), instr });
+        }
+    }
 }

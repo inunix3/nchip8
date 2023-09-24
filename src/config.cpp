@@ -36,6 +36,7 @@ Config::Config(const std::string &path) : savePath { path } {
     graphics.scaleFactor  = graphicsGroup.lookup("scaleFactor");
 
     cpu.cyclesPerSec = cpuGroup.lookup("cyclesPerSec");
+    cpu.rplFlags = (std::uint64_t) (long long) cpuGroup.lookup("rplFlags");
 
     input.layoutIdx = inputGroup.lookup("layoutIdx");
     input.layout    = input.layoutIdx == 0 ? ORIGINAL_LAYOUT : MODERN_LAYOUT;
@@ -73,6 +74,7 @@ void Config::writeFile(const std::string &path) const {
     graphicsGroup.add("scaleFactor",  lc::Setting::TypeInt) = graphics.scaleFactor;
 
     cpuGroup.add("cyclesPerSec", lc::Setting::TypeInt) = (int) cpu.cyclesPerSec;
+    cpuGroup.add("rplFlags", lc::Setting::TypeInt64) = (long long) cpu.rplFlags;
 
     inputGroup.add("layoutIdx", lc::Setting::TypeInt) = input.layoutIdx;
 

@@ -75,6 +75,24 @@ std::string nchip8::instrKindToString(InstrKind kind) {
         return "REG_DUMP";
     case InstrKind::REG_LOAD:
         return "REG_LOAD";
+    case InstrKind::HIRES:
+        return "HIRES";
+    case InstrKind::LORES:
+        return "LORES";
+    case InstrKind::SCROLL_DOWN:
+        return "SCROLL_DOWN";
+    case InstrKind::SCROLL_RIGHT:
+        return "SCROLL_RIGHT";
+    case InstrKind::SCROLL_LEFT:
+        return "SCROLL_LEFT";
+    case InstrKind::BIG_FONT_CHAR:
+        return "BIG_FONT_CHAR";
+    case InstrKind::SAVE_FLAGS:
+        return "SAVE_FLAGS";
+    case InstrKind::LOAD_FLAGS:
+        return "LOAD_FLAGS";
+    case InstrKind::EXIT:
+        return "EXIT";
     }
 }
 

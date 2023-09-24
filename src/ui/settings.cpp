@@ -18,13 +18,19 @@ Settings::Settings(sdl::Window &window, VM &vm, UI &ui)
       m_quirks     { vm.quirks },
       m_offColor   { imgui::rgbaToImVec4(vm.cfg.graphics.offColor) },
       m_onColor    { imgui::rgbaToImVec4(vm.cfg.graphics.onColor)  },
-      m_enableGrid { vm.display.enableGrid } {
+      m_enableGrid { vm.display.gridEnabled() } {
+
 }
 
 void Settings::body() {
     auto &cfg     = m_vm.cfg;
     auto &display = m_vm.display;
     auto &beeper  = m_vm.beeper;
+
+    // synchronize if flags were changed by executing the FX75 opcode
+    if (m_newCfg.cpu.rplFlags != cfg.cpu.rplFlags) {
+        m_newCfg.cpu.rplFlags  = cfg.cpu.rplFlags;
+    }
 
     if (ImGui::BeginTabBar("Settings Tab bar")) {
         if (ImGui::BeginTabItem("CPU"))      { sectionCPU();      ImGui::EndTabItem(); }
@@ -58,10 +64,12 @@ void Settings::body() {
 
         m_vm.quirks = m_quirks;
 
-        display.offColor = cfg.graphics.offColor;
-        display.onColor = cfg.graphics.onColor;
-        display.enableGrid = m_enableGrid;
+        display.setOffColor(cfg.graphics.offColor);
+        display.setOnColor(cfg.graphics.onColor);
+        m_enableGrid ? display.enableGrid() : display.disableGrid();
         display.setScaleFactor(cfg.graphics.scaleFactor);
+        display.wrapPixelsX = m_quirks.wrapPixelsX;
+        display.wrapPixelsY = m_quirks.wrapPixelsY;
 
         beeper.frequency = (int) cfg.sound.frequency;
         beeper.level = cfg.sound.level;
@@ -102,6 +110,13 @@ void Settings::sectionCPU() {
 
     markerNotSaved();
 
+    if (ImGui::InputScalar("RPL flags", ImGuiDataType_U64, &m_newCfg.cpu.rplFlags, nullptr, nullptr, "%" PRIx64,
+                ImGuiInputTextFlags_EnterReturnsTrue)) {
+        m_vm.cfg.cpu.rplFlags = m_newCfg.cpu.rplFlags;
+    }
+
+    marker("SCHIP/XO-CHIP only");
+
     ImGui::Checkbox("Debug mode", &m_newCfg.cpu.debugMode);
     markerNotSaved();
 }
@@ -109,13 +124,19 @@ void Settings::sectionCPU() {
 void Settings::sectionQuirks() {
     ImGui::Checkbox("Bnnn: use only V0 as the offset", &m_quirks.jumpOffsetUseV0);
     markerNotSaved();
-    ImGui::Checkbox("Dxyn: wrap pixels; don't clip", &m_quirks.wrapPixels);
+    ImGui::Checkbox("Dxyn: horizontal wrapping", &m_quirks.wrapPixelsX);
+    markerNotSaved();
+    ImGui::Checkbox("Dxyn: vertical wrapping", &m_quirks.wrapPixelsY);
     markerNotSaved();
     ImGui::Checkbox("8xy6 and 8xyE: set VX to VY", &m_quirks.shiftSetVxToVy);
     markerNotSaved();
     ImGui::Checkbox("8xy1, 8xy2 and 8xy3: reset VF", &m_quirks.bitwiseResetVF);
     markerNotSaved();
     ImGui::Checkbox("Fx55 and Fx65: increment I", &m_quirks.loadSaveIncrementI);
+    markerNotSaved();
+
+    ImGui::SeparatorText("SCHIP");
+    ImGui::Checkbox("Dxy0: draw 8x16 sprite in lo-res mode", &m_quirks.draw8x16SpriteInLores);
     markerNotSaved();
 }
 
@@ -204,13 +225,17 @@ void Settings::sectionUI() {
 }
 
 void Settings::markerNotSaved() {
+    marker("This setting is not saved to the config file");
+};
+
+void Settings::marker(const std::string &text) {
     ImGui::SameLine();
     ImGui::TextDisabled("(*)");
 
     if (ImGui::BeginItemTooltip()) {
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted("This setting is not saved to the config file");
+        ImGui::TextUnformatted(text.c_str());
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
-};
+}

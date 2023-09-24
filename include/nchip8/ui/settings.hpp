@@ -25,6 +25,7 @@ namespace nchip8::ui {
         void sectionUI();
 
         void markerNotSaved();
+        void marker(const std::string &text);
 
         sdl::Window &m_window;
         VM     &m_vm;
