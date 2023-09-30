@@ -64,8 +64,9 @@ namespace nchip8 {
         void setScaleFactor(int factor);
         void setOffColor(sdl::Color color);
         void setOnColor(sdl::Color color);
-        void enableGrid();
-        void disableGrid();
+        void setFadeSpeed(double speed);
+        void enableGrid(bool enable);
+        void enableFade(bool enable);
 
         sdl::Point size() const;
         Resolution res() const;
@@ -73,19 +74,26 @@ namespace nchip8 {
         sdl::Color offColor() const;
         sdl::Color onColor() const;
         bool gridEnabled() const;
+        bool fadeEnabled() const;
 
         bool wrapPixelsX = false;
         bool wrapPixelsY = false;
 
     private:
+        struct FadePixel {
+            FadePixel(sdl::Point pos, sdl::Color color, sdl::Color offColor);
+
+            sdl::Point pos;
+            sdl::Color color;
+            sdl::Color offColor;
+            double step = 7.0;
+
+            void fade(double speed);
+            bool faded() const;
+        };
+
         struct Line {
             Line() = default;
-
-            inline void reset() {
-                data.reset();
-                updatedRegion.begin = 0;
-                updatedRegion.end   = 0;
-            }
 
             std::bitset<HIRES_DISPLAY_SIZE.x> data;
 
@@ -102,13 +110,17 @@ namespace nchip8 {
 
         std::deque<Line> m_lines;
         std::unordered_set<std::size_t> m_updatedLines;
+        std::unordered_map<sdl::Point, FadePixel> m_fadePixels;
+        std::uint32_t m_lastlyFaded = 0;
 
         sdl::Renderer &m_renderer;
         sdl::Texture m_texture;
         bool m_changed = false;
 
         bool m_enableGrid  = false;
+        bool m_enableFade = false;
         int  m_scaleFactor = 1;
+        double m_fadeSpeed = 5.0;
         sdl::Color m_offColor = DEFAULT_OFF_COLOR;
         sdl::Color m_onColor  = DEFAULT_ON_COLOR;
         sdl::Point m_pixelSize;

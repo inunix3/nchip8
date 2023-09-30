@@ -67,6 +67,7 @@ namespace nchip8 {
         sdl::Color onColor    = { 0xff, 0xff, 0xff, 0xff };
         sdl::Point windowSize = LORES_DISPLAY_SIZE * 10;
         int scaleFactor = 1;
+        bool enableFade = false;
     };
 
     struct InputConfig {

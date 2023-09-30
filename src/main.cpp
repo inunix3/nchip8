@@ -34,6 +34,8 @@ MainApplication::MainApplication()
     m_display.setScaleFactor(m_cfg.graphics.scaleFactor);
     m_display.setOffColor(m_cfg.graphics.offColor);
     m_display.setOnColor(m_cfg.graphics.onColor);
+    m_display.enableFade(m_cfg.graphics.enableFade);
+    m_display.setFadeSpeed(m_cfg.cpu.cyclesPerSec);
     m_display.wrapPixelsX = m_vm.quirks.wrapPixelsX;
     m_display.wrapPixelsY = m_vm.quirks.wrapPixelsY;
 }

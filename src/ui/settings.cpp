@@ -66,10 +66,12 @@ void Settings::body() {
 
         display.setOffColor(cfg.graphics.offColor);
         display.setOnColor(cfg.graphics.onColor);
-        m_enableGrid ? display.enableGrid() : display.disableGrid();
+        display.enableGrid(m_enableGrid);
         display.setScaleFactor(cfg.graphics.scaleFactor);
         display.wrapPixelsX = m_quirks.wrapPixelsX;
         display.wrapPixelsY = m_quirks.wrapPixelsY;
+        display.enableFade(cfg.graphics.enableFade);
+        display.setFadeSpeed(cfg.cpu.cyclesPerSec);
 
         beeper.frequency = (int) cfg.sound.frequency;
         beeper.level = cfg.sound.level;
@@ -165,6 +167,8 @@ void Settings::sectionGraphics() {
 
     ImGui::Checkbox("Draw grid", &m_enableGrid);
     markerNotSaved();
+
+    ImGui::Checkbox("LCD effect (pixels fade away)", &m_newCfg.graphics.enableFade);
 }
 
 void Settings::sectionInput() {
