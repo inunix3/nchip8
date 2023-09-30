@@ -130,8 +130,9 @@ void VM::update() {
     static std::uint32_t lastlyStepped = SDL_GetTicks();
     std::uint32_t currentTime = SDL_GetTicks();
     std::uint32_t deltaTime   = currentTime - lastlyStepped;
+    bool timeToStep = cfg.cpu.uncapCyclesPerSec || deltaTime >= 1000 / cfg.cpu.cyclesPerSec;
 
-    if (m_mode == VMMode::RUN && (deltaTime >= 1000 / cfg.cpu.cyclesPerSec)) {
+    if (m_mode == VMMode::RUN && timeToStep) {
         lastlyStepped = currentTime;
 
         if (breakpoints.has(state.pc)) {

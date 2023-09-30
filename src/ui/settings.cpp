@@ -101,7 +101,11 @@ void Settings::body() {
 void Settings::sectionCPU() {
     ImGui::PushItemWidth(ImGui::GetFontSize() * 7);
     ImGui::InputScalar("Cycles/sec", ImGuiDataType_U32, &m_newCfg.cpu.cyclesPerSec, nullptr, nullptr, "%" PRId32);
-    ImGui::InputScalar("PRNG seed",  ImGuiDataType_U32, &m_newCfg.cpu.rngSeed,      nullptr, nullptr, "%" PRId32);
+
+    m_newCfg.cpu.cyclesPerSec = std::clamp(m_newCfg.cpu.cyclesPerSec, 50u, 1000u);
+
+    ImGui::Checkbox("Uncap cycles/sec", &m_newCfg.cpu.uncapCyclesPerSec);
+    ImGui::InputScalar("PRNG seed",  ImGuiDataType_U32, &m_newCfg.cpu.rngSeed, nullptr, nullptr, "%" PRId32);
     ImGui::PopItemWidth();
 
     ImGui::SameLine();

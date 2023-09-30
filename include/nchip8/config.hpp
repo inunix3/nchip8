@@ -76,9 +76,10 @@ namespace nchip8 {
     };
 
     struct CPUConfig {
-        unsigned cyclesPerSec = 250;
-        unsigned rngSeed      = (unsigned) time(NULL);
-        bool     debugMode    = false;
+        unsigned cyclesPerSec      = 250;
+        bool     uncapCyclesPerSec = false;
+        unsigned rngSeed           = (unsigned) time(NULL);
+        bool     debugMode         = false;
 
         // By SCHIP design, these were supposed to be the RPL user flags on HP-48.
         //

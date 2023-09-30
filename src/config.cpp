@@ -36,8 +36,9 @@ Config::Config(const std::string &path) : savePath { path } {
     graphics.scaleFactor  = graphicsGroup.lookup("scaleFactor");
     graphics.enableFade   = graphicsGroup.lookup("enableFade");
 
-    cpu.cyclesPerSec = cpuGroup.lookup("cyclesPerSec");
-    cpu.rplFlags = (std::uint64_t) (long long) cpuGroup.lookup("rplFlags");
+    cpu.cyclesPerSec      = cpuGroup.lookup("cyclesPerSec");
+    cpu.uncapCyclesPerSec = cpuGroup.lookup("uncapCyclesPerSec");
+    cpu.rplFlags          = (std::uint64_t) (long long) cpuGroup.lookup("rplFlags");
 
     input.layoutIdx = inputGroup.lookup("layoutIdx");
     input.layout    = input.layoutIdx == 0 ? ORIGINAL_LAYOUT : MODERN_LAYOUT;
@@ -68,15 +69,16 @@ void Config::writeFile(const std::string &path) const {
     lc::Setting &soundGroup    = root.add("sound",    lc::Setting::TypeGroup);
     lc::Setting &uiGroup       = root.add("ui",       lc::Setting::TypeGroup);
 
-    graphicsGroup.add("onColor",      lc::Setting::TypeInt) = (int) colorToInt(graphics.onColor);
-    graphicsGroup.add("offColor",     lc::Setting::TypeInt) = (int) colorToInt(graphics.offColor);
-    graphicsGroup.add("windowWidth",  lc::Setting::TypeInt) = graphics.windowSize.x;
-    graphicsGroup.add("windowHeight", lc::Setting::TypeInt) = graphics.windowSize.y;
-    graphicsGroup.add("scaleFactor",  lc::Setting::TypeInt) = graphics.scaleFactor;
+    graphicsGroup.add("onColor",      lc::Setting::TypeInt)     = (int) colorToInt(graphics.onColor);
+    graphicsGroup.add("offColor",     lc::Setting::TypeInt)     = (int) colorToInt(graphics.offColor);
+    graphicsGroup.add("windowWidth",  lc::Setting::TypeInt)     = graphics.windowSize.x;
+    graphicsGroup.add("windowHeight", lc::Setting::TypeInt)     = graphics.windowSize.y;
+    graphicsGroup.add("scaleFactor",  lc::Setting::TypeInt)     = graphics.scaleFactor;
     graphicsGroup.add("enableFade",   lc::Setting::TypeBoolean) = graphics.enableFade;
 
-    cpuGroup.add("cyclesPerSec", lc::Setting::TypeInt) = (int) cpu.cyclesPerSec;
-    cpuGroup.add("rplFlags", lc::Setting::TypeInt64) = (long long) cpu.rplFlags;
+    cpuGroup.add("cyclesPerSec",      lc::Setting::TypeInt)     = (int) cpu.cyclesPerSec;
+    cpuGroup.add("uncapCyclesPerSec", lc::Setting::TypeBoolean) = cpu.uncapCyclesPerSec;
+    cpuGroup.add("rplFlags",          lc::Setting::TypeInt64)   = (long long) cpu.rplFlags;
 
     inputGroup.add("layoutIdx", lc::Setting::TypeInt) = input.layoutIdx;
 
