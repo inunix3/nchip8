@@ -42,7 +42,7 @@ Just type `./nchip8` (or `nchip8` if you've installed it)!
 Maybe, for certain games you'd like to change the amount of cycles per second, colors, etc.
 
 ## Todo
-- ~~[ ] Ability to optionally disable flickering~~
+- ~~Ability to optionally disable flickering~~
 - [x] Add pixel fading to smooth out the flickering
 - [x] Support for SCHIP
 - [ ] Support for XO-CHIP
