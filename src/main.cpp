@@ -6,7 +6,7 @@
 #include <nchip8/sdl.hpp>
 #include <nchip8/vm.hpp>
 
-#include <libconfig.h++>
+#include <toml.hpp>
 
 // Needed for getting an absolute path to the HOME
 #include <pwd.h>
@@ -15,6 +15,7 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <optional>
 
@@ -102,6 +103,10 @@ Config MainApplication::readConfig() {
         return home ? std::make_optional(home) : std::nullopt;
     };
 
+    auto createFile = [](const std::string &path) {
+        std::ofstream file(path, std::ios::out | std::ios::trunc);
+    };
+
     std::string path;
     auto homeDir = getHomeDirPath();
 
@@ -116,36 +121,20 @@ Config MainApplication::readConfig() {
     }
 
     if (!fs::exists(path)) {
-        Config cfg;
-
-        // Write config with default settings
-        cfg.writeFile(path);
-        cfg.savePath = path;
-
-        return cfg;
+        createFile(path);
     }
 
     return Config(path);
 }
 
 int main() {
-    try {
-        sdl::SDL sdl(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER);
+    sdl::SDL sdl(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER);
 
+    try {
         MainApplication app;
         app.run();
-    } catch (const libconfig::SettingNotFoundException &err) {
-        std::cerr << "error: setting " << err.getPath() << " not found\n";
-    } catch (const libconfig::SettingNameException &err) {
-        std::cerr << "error: invalid setting name " << err.getPath() << " (already exists or has invalid characters)\n";
-    } catch (const libconfig::SettingTypeException &err) {
-        std::cerr << "error: setting " << err.getPath() << " has invalid type\n";
-    } catch (const libconfig::ParseException &err) {
-        std::cerr << "error: cannot parse config file: " << err.getLine() << ": " << err.getError() << '\n';
-    } catch (const libconfig::FileIOException &err) {
-        std::cerr << "error: cannot read/write config file due to I/O error\n";
-    } catch (const std::runtime_error &err) {
-        std::cerr << "error: " << err.what() << '\n';
+    } catch (const toml::syntax_error &e) {
+        std::cerr << e.what() << '\n';
     }
 
     return EXIT_SUCCESS;

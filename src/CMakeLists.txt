@@ -67,6 +67,6 @@ endif()
 add_executable(nchip8 ${HEADERS} ${SOURCES})
 target_compile_options(nchip8 PRIVATE ${COMPILE_OPTIONS})
 target_include_directories(nchip8 PRIVATE "${PROJECT_SOURCE_DIR}/include")
-target_link_libraries(nchip8 PRIVATE m config++ SDL2pp::SDL2pp imgui ${OPENGL_LIBRARIES} ImGuiFileDialog)
+target_link_libraries(nchip8 PRIVATE m toml11::toml11 SDL2pp::SDL2pp imgui ${OPENGL_LIBRARIES} ImGuiFileDialog)
 
 install(TARGETS nchip8 DESTINATION bin)

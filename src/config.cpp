@@ -3,12 +3,21 @@
 
 #include <nchip8/config.hpp>
 
-#include <libconfig.h++>
+#include <toml.hpp>
+
+#include <fstream>
 
 using namespace nchip8;
-namespace lc = libconfig;
 
 Config::Config(const std::string &path) : savePath { path } {
+    toml::value root = toml::parse(path);
+
+    const auto &graphicsTable = toml::find_or(root, "graphics", {});
+    const auto &cpuTable      = toml::find_or(root, "cpu", {});
+    const auto &inputTable    = toml::find_or(root, "input", {});
+    const auto &soundTable    = toml::find_or(root, "sound", {});
+    const auto &uiTable       = toml::find_or(root, "ui", {});
+    
     auto u32ToColor = [](std::uint32_t color) -> sdl::Color {
         std::uint8_t r = (color & 0xff000000) >> 24;
         std::uint8_t g = (color & 0x00ff0000) >> 16;
@@ -18,37 +27,29 @@ Config::Config(const std::string &path) : savePath { path } {
         return { r, g, b, a };
     };
 
-    lc::Config cfg;
-    cfg.readFile(path);
+    std::uint32_t onColorHex  = toml::find_or(graphicsTable, "onColor",  0xffffffffu);
+    std::uint32_t offColorHex = toml::find_or(graphicsTable, "offColor", 0x00000000u);
 
-    // Variables with 'Group' at the end were so named to avoid warnings about shadowing some fields.
-    const auto &root = cfg.getRoot();
-    const auto &graphicsGroup = root["graphics"];
-    const auto &cpuGroup      = root["cpu"];
-    const auto &inputGroup    = root["input"];
-    const auto &soundGroup    = root["sound"];
-    const auto &uiGroup       = root["ui"];
+    graphics.onColor  = u32ToColor(onColorHex);
+    graphics.offColor = u32ToColor(offColorHex);
+    graphics.windowSize.x = toml::find_or(graphicsTable, "windowWidth", LORES_DISPLAY_SIZE.x * 10);
+    graphics.windowSize.y = toml::find_or(graphicsTable, "windowHeight", LORES_DISPLAY_SIZE.y * 10);
+    graphics.scaleFactor  = toml::find_or(graphicsTable, "scaleFactor", 1);
+    graphics.enableFade   = toml::find_or(graphicsTable, "enableFade", false);
 
-    graphics.onColor      = u32ToColor((std::uint32_t) (int) graphicsGroup.lookup("onColor"));
-    graphics.offColor     = u32ToColor((std::uint32_t) (int) graphicsGroup.lookup("offColor"));
-    graphics.windowSize.x = graphicsGroup.lookup("windowWidth");
-    graphics.windowSize.y = graphicsGroup.lookup("windowHeight");
-    graphics.scaleFactor  = graphicsGroup.lookup("scaleFactor");
-    graphics.enableFade   = graphicsGroup.lookup("enableFade");
+    cpu.cyclesPerSec      = toml::find_or(cpuTable, "cyclesPerSec", 250u);
+    cpu.uncapCyclesPerSec = toml::find_or(cpuTable, "uncapCyclesPerSec", false);
+    cpu.rplFlags          = toml::find_or(cpuTable, "rplFlags", (std::uint64_t) 0);
 
-    cpu.cyclesPerSec      = cpuGroup.lookup("cyclesPerSec");
-    cpu.uncapCyclesPerSec = cpuGroup.lookup("uncapCyclesPerSec");
-    cpu.rplFlags          = (std::uint64_t) (long long) cpuGroup.lookup("rplFlags");
-
-    input.layoutIdx = inputGroup.lookup("layoutIdx");
+    input.layoutIdx = toml::find_or(inputTable, "layoutIdx", 1); // Modern layout
     input.layout    = input.layoutIdx == 0 ? ORIGINAL_LAYOUT : MODERN_LAYOUT;
 
-    sound.enable    = soundGroup.lookup("enable");
-    sound.level     = soundGroup.lookup("level");
-    sound.frequency = soundGroup.lookup("frequency");
-    sound.waveform  = (Waveform) (int) soundGroup.lookup("waveform");
+    sound.enable    = toml::find_or(soundTable, "enable", true);
+    sound.level     = toml::find_or(soundTable, "level", 3.00); // dB
+    sound.frequency = toml::find_or(soundTable, "frequency", 440);
+    sound.waveform  = (Waveform) toml::find_or(soundTable, "waveform", (int) Waveform::SQUARE);
 
-    ui.style = (ui::UIStyle) (int) uiGroup.lookup("style");
+    ui.style = (ui::UIStyle) toml::find_or(uiTable, "style", (int) ui::UIStyle::DARK);
 }
 
 void Config::writeFile() const {
@@ -56,38 +57,43 @@ void Config::writeFile() const {
 }
 
 void Config::writeFile(const std::string &path) const {
-    auto colorToInt = [](sdl::Color color) -> std::uint32_t {
+    auto colorToU32 = [](sdl::Color color) -> std::uint32_t {
         return std::uint32_t ((color.r << 24) | (color.g << 16) | (color.b << 8) | color.a);
     };
 
-    lc::Config cfg;
+    toml::value root = toml::table();
+    toml::value graphicsTable = toml::table();
+    toml::value cpuTable      = toml::table();
+    toml::value inputTable    = toml::table();
+    toml::value soundTable    = toml::table();
+    toml::value uiTable       = toml::table();
 
-    lc::Setting &root = cfg.getRoot();
-    lc::Setting &graphicsGroup = root.add("graphics", lc::Setting::TypeGroup);
-    lc::Setting &cpuGroup      = root.add("cpu",      lc::Setting::TypeGroup);
-    lc::Setting &inputGroup    = root.add("input",    lc::Setting::TypeGroup);
-    lc::Setting &soundGroup    = root.add("sound",    lc::Setting::TypeGroup);
-    lc::Setting &uiGroup       = root.add("ui",       lc::Setting::TypeGroup);
+    graphicsTable["onColor"]      = colorToU32(graphics.onColor);
+    graphicsTable["offColor"]     = colorToU32(graphics.offColor);
+    graphicsTable["windowWidth"]  = graphics.windowSize.x;
+    graphicsTable["windowHeight"] = graphics.windowSize.y;
+    graphicsTable["scaleFactor"]  = graphics.scaleFactor;
+    graphicsTable["enableFade"]   = graphics.enableFade;
 
-    graphicsGroup.add("onColor",      lc::Setting::TypeInt)     = (int) colorToInt(graphics.onColor);
-    graphicsGroup.add("offColor",     lc::Setting::TypeInt)     = (int) colorToInt(graphics.offColor);
-    graphicsGroup.add("windowWidth",  lc::Setting::TypeInt)     = graphics.windowSize.x;
-    graphicsGroup.add("windowHeight", lc::Setting::TypeInt)     = graphics.windowSize.y;
-    graphicsGroup.add("scaleFactor",  lc::Setting::TypeInt)     = graphics.scaleFactor;
-    graphicsGroup.add("enableFade",   lc::Setting::TypeBoolean) = graphics.enableFade;
+    cpuTable["cyclesPerSec"]      = cpu.cyclesPerSec;
+    cpuTable["uncapCyclesPerSec"] = cpu.uncapCyclesPerSec;
+    cpuTable["rplFlags"]          = cpu.rplFlags;
 
-    cpuGroup.add("cyclesPerSec",      lc::Setting::TypeInt)     = (int) cpu.cyclesPerSec;
-    cpuGroup.add("uncapCyclesPerSec", lc::Setting::TypeBoolean) = cpu.uncapCyclesPerSec;
-    cpuGroup.add("rplFlags",          lc::Setting::TypeInt64)   = (long long) cpu.rplFlags;
+    inputTable["layoutIdx"] = input.layoutIdx;
 
-    inputGroup.add("layoutIdx", lc::Setting::TypeInt) = input.layoutIdx;
+    soundTable["enable"]    = sound.enable;
+    soundTable["level"]     = sound.level;
+    soundTable["frequency"] = sound.frequency;
+    soundTable["waveform"]  = (int) sound.waveform;
 
-    soundGroup.add("enable",    lc::Setting::TypeBoolean) = sound.enable;
-    soundGroup.add("level",     lc::Setting::TypeFloat) = sound.level;
-    soundGroup.add("frequency", lc::Setting::TypeInt) = sound.frequency;
-    soundGroup.add("waveform",  lc::Setting::TypeInt) = (int) sound.waveform;
+    uiTable["style"] = (int) ui.style;
 
-    uiGroup.add("style", lc::Setting::TypeInt) = (int) ui.style;
+    root["graphics"] = graphicsTable;
+    root["cpu"]      = cpuTable;
+    root["input"]    = inputTable;
+    root["sound"]    = soundTable;
+    root["ui"]       = uiTable;
 
-    cfg.writeFile(path);
+    std::ofstream file(path, std::ios::binary | std::ios::trunc);
+    file << root;
 }
