@@ -10,15 +10,16 @@
 
 #include <array>
 #include <ctime>
+#include <ostream>
 #include <string>
 
 namespace nchip8 {
-    inline constexpr const char *CONFIG_FILENAME = ".nchip8.cfg";
+    inline constexpr const char *CONFIG_FILENAME = ".nchip8.toml";
     inline constexpr int KEY_COUNT = 16;
 
     using InputLayout = std::array<std::pair<SDL_Scancode, int>, KEY_COUNT>;
 
-    inline const InputLayout ORIGINAL_LAYOUT { {
+    inline constexpr InputLayout ORIGINAL_LAYOUT { {
         { SDL_SCANCODE_1, 0x1 },
         { SDL_SCANCODE_2, 0x2 },
         { SDL_SCANCODE_3, 0x3 },
@@ -40,7 +41,7 @@ namespace nchip8 {
         { SDL_SCANCODE_F, 0xF }
     } };
 
-    inline const InputLayout MODERN_LAYOUT { {
+    inline constexpr InputLayout MODERN_LAYOUT { {
         { SDL_SCANCODE_1, 0x1 },
         { SDL_SCANCODE_2, 0x2 },
         { SDL_SCANCODE_3, 0x3 },
@@ -61,6 +62,36 @@ namespace nchip8 {
         { SDL_SCANCODE_C, 0xB },
         { SDL_SCANCODE_V, 0xF }
     } };
+
+    namespace default_values {
+        namespace graphics {
+            inline constexpr sdl::Color OFF_COLOR    = { 0x00, 0x00, 0x00, 0xff };
+            inline constexpr sdl::Color ON_COLOR     = { 0x00, 0x00, 0x00, 0xff };
+            inline constexpr sdl::Point WINDOW_SIZE  = LORES_DISPLAY_SIZE * 10;
+            inline constexpr int        SCALE_FACTOR = 1;
+        }
+
+        namespace input {
+            inline constexpr int         LAYOUT_IDX = 1; // MODERN_LAYOUT
+            inline constexpr InputLayout LAYOUT     = MODERN_LAYOUT;
+        }
+
+        namespace cpu {
+            inline constexpr unsigned CYCLES_PER_SEC = 250;
+            inline constexpr bool     DEBUG_MODE     = false;
+        }
+
+        namespace sound {
+            inline constexpr bool     ENABLE    = true;
+            inline constexpr double   LEVEL     = 3.00; // dB
+            inline constexpr int      FREQUENCY = 440;
+            inline constexpr Waveform WAVEFORM  = Waveform::SQUARE;
+        }
+
+        namespace ui {
+            inline constexpr ::nchip8::ui::UIStyle STYLE = ::nchip8::ui::UIStyle::DARK;
+        }
+    };
 
     struct GraphicsConfig {
         sdl::Color offColor   = { 0x00, 0x00, 0x00, 0xff };

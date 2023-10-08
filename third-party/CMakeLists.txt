@@ -3,11 +3,8 @@
 
 find_package(OpenGL REQUIRED)
 
-# libconfig
-set(BUILD_EXAMPLES    OFF CACHE BOOL "" FORCE)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-set(BUILD_TESTS       OFF CACHE BOOL "" FORCE)
-add_subdirectory(libconfig)
+# toml11
+add_subdirectory(toml11)
 
 # SDL2
 set(SDL_TEST       OFF CACHE BOOL "" FORCE)
