@@ -11,6 +11,6 @@
 [submodule "third-party/libSDL2pp"]
 	path = third-party/libSDL2pp
 	url = https://github.com/libSDL2pp/libSDL2pp.git
-[submodule "third-party/libconfig"]
-	path = third-party/libconfig
-	url = https://github.com/hyperrealm/libconfig.git
+[submodule "third-party/toml11"]
+	path = third-party/toml11
+	url = https://github.com/ToruNiina/toml11.git
