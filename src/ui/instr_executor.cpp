@@ -1,4 +1,4 @@
-// Copyright (c) 2023-present, eaxecx.
+// Copyright (c) 2024 inunix3.
 // This file is distributed under the MIT license (https://opensource.org/license/mit/)
 
 #include <nchip8/ui/instr_executor.hpp>
