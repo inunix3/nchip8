@@ -111,7 +111,7 @@ void UI::input() {
         }
 
         if (m_io->KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S)) {
-            try { 
+            try {
                 m_vm.step();
             } catch (const VMError &err) {
                 showError(err.what());
@@ -280,7 +280,7 @@ void UI::windows() {
     if (m_showAbout)    about();
 
     m_settings.render();
-    
+
     if (m_vm.cfg.cpu.debugMode) {
         m_breakpoints.render();
         m_disassembler.render();
@@ -372,7 +372,7 @@ void UI::about() {
     ImGui::Dummy({ 0, 1 });
 
     ImGui::TextUnformatted("Written in C++17 with the use of these libraries:");
-    ImGui::BulletText("libconfig");
+    ImGui::BulletText("toml11");
     ImGui::BulletText("SDL2");
     ImGui::BulletText("SDL2pp (C++ wrapper over SDL2)");
     ImGui::BulletText("Dear ImGui");
