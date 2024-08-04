@@ -175,7 +175,6 @@ void VM::updateInputTable(const SDL_Event &event) {
     auto &inputTable = state.inputTable;
     const auto &keysym = event.key.keysym;
 
-    // Ctrl+X and just X are different things!
     if (keysym.mod != KMOD_NONE) {
         return;
     }
