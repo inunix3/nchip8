@@ -1,11 +1,11 @@
 # nCHIP-8
-A CHIP-8/SCHIP interpreter, written in C++17 with the use of SDL2 and Dear ImGui for UI. It's customizable and has some debug capabilities!
+A CHIP-8/SCHIP interpreter, written in C++17 with the use of SDL2 and Dear ImGui for UI. It's customizable and has debug capabilities!
 
 [**Video**](https://drive.google.com/file/d/1VJpbM7gC9RqfsyXIdQ_G24tuiyJ7AvO9/view?usp=sharing)
 
 [**Screenshots**](screenshots/)
 
-It wasn't written for educational purposes, but just for fun. Nevertheless, I still learned something new.
+Written just for fun.
 
 ## Features
 - Full SCHIP support
@@ -34,12 +34,12 @@ It wasn't written for educational purposes, but just for fun. Nevertheless, I st
 ## Building
 You can build simply by creating `build` directory, going to it and calling the cmake (e.g. `cmake ..`)
 
-Optionally, you can install my interpreter typing something like `sudo cmake --install .`
+Optionally, you can install nchip8 by typing `sudo cmake --install .`
 
 ## Usage
 Just type `./nchip8` (or `nchip8` if you've installed it)!
 
-Maybe, for certain games you'd like to change the amount of cycles per second, colors, etc.
+For certain games you may like to change the amount of cycles per second, colors, etc.
 
 ## Todo
 - ~~Ability to optionally disable flickering~~
