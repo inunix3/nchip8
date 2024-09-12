@@ -133,11 +133,8 @@ void Display::setPixel(sdl::Point pos, PixelState state) {
     line.data[posX] = bit;
 
     auto &region = line.updatedRegion;
-    region.begin = region.begin == 0 ? posX : std::min(region.begin, posX);
-
-    if (posX >= region.begin) {
-        region.end = region.begin + posX;
-    }
+    region.begin = std::min(region.begin, posX);
+    region.end = std::max(region.end, posX);
 
     m_updatedLines.insert(posY);
     m_changed = true;
